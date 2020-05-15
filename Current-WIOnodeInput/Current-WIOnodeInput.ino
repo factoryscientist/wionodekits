@@ -73,7 +73,12 @@ float MeasureCurrent(){
     ad_data[i] = (float)analogRead(A0);
   }
 
-
+//calculate mean
+  int max_data = 0;
+  int min_data = 1023;
+  for(int i=0; i<100; i++){
+    if(ad_data[i] > max_data) max_data = ad_data[i];
+    if(ad_data[i] < min_data) min_data = ad_data[i];
   }
 
   int current_amplitude = (max_data - min_data) * 5; // ÷ 2 * 10[mv per unit]
