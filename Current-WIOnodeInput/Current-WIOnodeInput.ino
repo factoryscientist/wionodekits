@@ -18,6 +18,9 @@ const uint8_t UART_RX = PORT0B;
 const uint8_t I2C_SDA = PORT1A;
 const uint8_t I2C_SCL = PORT1B;
 
+unsigned long durationtime;
+unsigned long pretime;
+
 void setup() {
   Serial.begin(115200);
   WiFi.begin("SSIDを入れる", "パスワードを入れる");
@@ -51,11 +54,23 @@ void loop() {
     
     Azure.connect();
     DataElement a = DataElement();
-    a.setValue("Sensor", "current");
-    a.setValue("espvalue", sending_data);    
-    Azure.push(&a);
+
+    durationtime = (millis() - pretime)/1000;
+    pretime = millis();
+
+    Serial.print("duration time: "); 
+    Serial.print(durationtime);
+    Serial.println(" sec for this loop");
+
+
     Serial.println(sending_data);
-    delay(2000); //delay for 30second
+        
+    a.setValue("sensor", "current");
+    a.setValue("espvalue", sending_data); 
+    a.setValue("duration", (int)durationtime);       
+    Azure.push(&a);
+
+    delay(5000); //delay for 30second
   } else {
     Serial.println("Not connected to the Internet");
     delay(250);

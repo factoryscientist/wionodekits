@@ -75,7 +75,7 @@ void loop() {
     Serial.println(" %\t");
 
     //
-    
+    a.setValue("sensor", "temp");
     a.setValue("espvalue", temperature_data);
     Azure.push(&a);
     //Serial.println("0");

@@ -25,7 +25,13 @@ const uint8_t I2C_SDA = PORT1A;
 const uint8_t I2C_SCL = PORT1B;
 
 
+unsigned long durationtime;
+unsigned long pretime;
 
+//cusomize
+
+
+//
 
 void setup() {
   Serial.begin(115200);
@@ -69,6 +75,16 @@ void loop() {
     Azure.connect();
     DataElement a = DataElement();
 
+
+
+    durationtime = (millis() - pretime)/1000;
+    pretime = millis();
+
+    Serial.print("duration time: "); 
+    Serial.print(durationtime);
+    Serial.println(" sec for this loop");
+
+
     //Customize
     //float temperature_data = sht31.getTemperature();
     //float humidity_data = sht31.getHumidity();
@@ -82,11 +98,13 @@ void loop() {
     Serial.println(" *C");
 
     //
-    
+    a.setValue("sensor", "temp");
     a.setValue("espvalue", temperature_data);
+    a.setValue("duration", (int)durationtime);    
+
     Azure.push(&a);
     //Serial.println("0");
-    delay(2000);
+    delay(5000);
   } else {
     Serial.println("Not connected to the Internet");
     delay(250);
