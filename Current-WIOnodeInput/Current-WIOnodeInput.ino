@@ -96,7 +96,7 @@ float MeasureCurrent(){
     if(ad_data[i] < min_data) min_data = ad_data[i];
   }
 
-  int current_amplitude = (max_data - min_data) * 5; // ÷ 2 * 10[mv per unit]
+  int current_amplitude = (max_data - min_data)*32/1000; // ÷ 2 * 3[mv per unit] ÷ 100[ohm] * 3000 ÷ 1.4
  
-  return (float)current_amplitude / 350 ;//y=350xが成り立つ y[A], x[V]
+  return (float)current_amplitude;//y=350xが成り立つ y[A], x[V]
 }
