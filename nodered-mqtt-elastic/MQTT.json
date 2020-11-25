@@ -1,0 +1,581 @@
+[
+  {
+    "id": "6fa90ba5.23aa14",
+    "type": "subflow",
+    "name": "Elasticsearch",
+    "info": "",
+    "category": "",
+    "in": [
+      {
+        "x": 50,
+        "y": 30,
+        "wires": [
+          {
+            "id": "fddd0364.7e4c1"
+          }
+        ]
+      }
+    ],
+    "out": [
+      {
+        "x": 580,
+        "y": 30,
+        "wires": [
+          {
+            "id": "f316100f.31b88",
+            "port": 0
+          }
+        ]
+      }
+    ],
+    "env": [],
+    "color": "#DDAA99"
+  },
+  {
+    "id": "9590e5f.47abd18",
+    "type": "http request",
+    "z": "6fa90ba5.23aa14",
+    "name": "Elasticsearch",
+    "method": "use",
+    "ret": "txt",
+    "paytoqs": false,
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "authType": "",
+    "x": 340,
+    "y": 30,
+    "wires": [
+      [
+        "f316100f.31b88"
+      ]
+    ]
+  },
+  {
+    "id": "fddd0364.7e4c1",
+    "type": "change",
+    "z": "6fa90ba5.23aa14",
+    "name": "msg.headers",
+    "rules": [
+      {
+        "t": "delete",
+        "p": "headers",
+        "pt": "msg"
+      },
+      {
+        "t": "set",
+        "p": "headers",
+        "pt": "msg",
+        "to": "{\"Content-Type\":\"application/json\",\"Connection\":\"close\"}",
+        "tot": "json"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 170,
+    "y": 30,
+    "wires": [
+      [
+        "9590e5f.47abd18"
+      ]
+    ]
+  },
+  {
+    "id": "f316100f.31b88",
+    "type": "json",
+    "z": "6fa90ba5.23aa14",
+    "name": "",
+    "property": "payload",
+    "action": "",
+    "pretty": false,
+    "x": 490,
+    "y": 30,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "236a59c6.43f3e6",
+    "type": "tab",
+    "label": "wionode-mqtt-elastic",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "fae4a8a7.7796b8",
+    "type": "debug",
+    "z": "236a59c6.43f3e6",
+    "name": "debug",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 310,
+    "y": 500,
+    "wires": []
+  },
+  {
+    "id": "d9671866.547e58",
+    "type": "aedes broker",
+    "z": "236a59c6.43f3e6",
+    "name": "",
+    "mqtt_port": 1883,
+    "mqtt_ws_port": "",
+    "cert": "",
+    "key": "",
+    "certname": "",
+    "keyname": "",
+    "dburl": "",
+    "usetls": false,
+    "x": 130,
+    "y": 500,
+    "wires": [
+      [
+        "fae4a8a7.7796b8"
+      ]
+    ]
+  },
+  {
+    "id": "62280083.f51b6",
+    "type": "comment",
+    "z": "236a59c6.43f3e6",
+    "name": "MQTT ブローカー",
+    "info": "",
+    "x": 130,
+    "y": 460,
+    "wires": []
+  },
+  {
+    "id": "815b3140.0a39a",
+    "type": "template",
+    "z": "236a59c6.43f3e6",
+    "name": "ES Query JSON",
+    "field": "payload",
+    "fieldType": "msg",
+    "format": "handlebars",
+    "syntax": "mustache",
+    "template": "{\"@timestamp\": \"{{date}}\",\"device\": \"{{{payload.device}}}\",\"{{payload.sensor}}\": {{{payload.data}}}}",
+    "output": "str",
+    "x": 600,
+    "y": 80,
+    "wires": [
+      [
+        "5ef2c1fc.fc70e",
+        "b621e972.1fd898"
+      ]
+    ]
+  },
+  {
+    "id": "51d0de3c.932ab",
+    "type": "change",
+    "z": "236a59c6.43f3e6",
+    "name": "POST _doc",
+    "rules": [
+      {
+        "t": "set",
+        "p": "method",
+        "pt": "msg",
+        "to": "POST",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "url",
+        "pt": "msg",
+        "to": "192.168.1.168:9200/sensors-",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "url",
+        "pt": "msg",
+        "from": "$",
+        "fromt": "re",
+        "to": "payload.sensor",
+        "tot": "msg"
+      },
+      {
+        "t": "change",
+        "p": "url",
+        "pt": "msg",
+        "from": "$",
+        "fromt": "re",
+        "to": "/_doc",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "date",
+        "pt": "msg",
+        "to": "$now()",
+        "tot": "jsonata"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 410,
+    "y": 80,
+    "wires": [
+      [
+        "815b3140.0a39a",
+        "21364ec8.e1f3b2"
+      ]
+    ]
+  },
+  {
+    "id": "f10ffe43.17e22",
+    "type": "mqtt in",
+    "z": "236a59c6.43f3e6",
+    "name": "MQTT One IN",
+    "topic": "OneData",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "850bda47.853398",
+    "x": 110,
+    "y": 80,
+    "wires": [
+      [
+        "30ba6d3f.5d5062"
+      ]
+    ]
+  },
+  {
+    "id": "5ef2c1fc.fc70e",
+    "type": "debug",
+    "z": "236a59c6.43f3e6",
+    "name": "debug",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 770,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "30ba6d3f.5d5062",
+    "type": "json",
+    "z": "236a59c6.43f3e6",
+    "name": "",
+    "property": "payload",
+    "action": "",
+    "pretty": false,
+    "x": 250,
+    "y": 80,
+    "wires": [
+      [
+        "51d0de3c.932ab",
+        "bbf60e8d.f24eb"
+      ]
+    ]
+  },
+  {
+    "id": "46ba3e47.06614",
+    "type": "debug",
+    "z": "236a59c6.43f3e6",
+    "name": "debug",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 950,
+    "y": 80,
+    "wires": []
+  },
+  {
+    "id": "b621e972.1fd898",
+    "type": "subflow:6fa90ba5.23aa14",
+    "z": "236a59c6.43f3e6",
+    "name": "",
+    "env": [],
+    "x": 790,
+    "y": 80,
+    "wires": [
+      [
+        "46ba3e47.06614"
+      ]
+    ]
+  },
+  {
+    "id": "21364ec8.e1f3b2",
+    "type": "debug",
+    "z": "236a59c6.43f3e6",
+    "name": "debug",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 570,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "aa0033c.653dfd",
+    "type": "comment",
+    "z": "236a59c6.43f3e6",
+    "name": "汎用的にできるようにした！Topic:OneData",
+    "info": "",
+    "x": 170,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "bbf60e8d.f24eb",
+    "type": "debug",
+    "z": "236a59c6.43f3e6",
+    "name": "debug",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 410,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "b45e9213.67afe",
+    "type": "template",
+    "z": "236a59c6.43f3e6",
+    "name": "ES Query JSON",
+    "field": "payload",
+    "fieldType": "msg",
+    "format": "handlebars",
+    "syntax": "mustache",
+    "template": "{\"@timestamp\": \"{{date}}\",\"device\": \"{{{payload.device}}}\",\"{{payload.sensor_One}}\": {{{payload.data_One}}},\"{{payload.sensor_Two}}\": {{{payload.data_Two}}}}",
+    "output": "str",
+    "x": 600,
+    "y": 240,
+    "wires": [
+      [
+        "58ffeaef.9756a4",
+        "b9f3b130.88179"
+      ]
+    ]
+  },
+  {
+    "id": "ad320377.9db19",
+    "type": "change",
+    "z": "236a59c6.43f3e6",
+    "name": "POST _doc",
+    "rules": [
+      {
+        "t": "set",
+        "p": "method",
+        "pt": "msg",
+        "to": "POST",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "url",
+        "pt": "msg",
+        "to": "192.168.1.168:9200/sensors-",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "url",
+        "pt": "msg",
+        "from": "$",
+        "fromt": "re",
+        "to": "payload.sensor_One",
+        "tot": "msg"
+      },
+      {
+        "t": "change",
+        "p": "url",
+        "pt": "msg",
+        "from": "$",
+        "fromt": "re",
+        "to": "payload.sensor_Two",
+        "tot": "msg"
+      },
+      {
+        "t": "change",
+        "p": "url",
+        "pt": "msg",
+        "from": "$",
+        "fromt": "re",
+        "to": "/_doc",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "date",
+        "pt": "msg",
+        "to": "$now()",
+        "tot": "jsonata"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 410,
+    "y": 240,
+    "wires": [
+      [
+        "b45e9213.67afe",
+        "b9951b57.0dce68"
+      ]
+    ]
+  },
+  {
+    "id": "82b5d538.2fdbb8",
+    "type": "mqtt in",
+    "z": "236a59c6.43f3e6",
+    "name": "MQTT Two IN",
+    "topic": "TwoData",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "850bda47.853398",
+    "x": 110,
+    "y": 240,
+    "wires": [
+      [
+        "8ad7b6a1.b0f0d8"
+      ]
+    ]
+  },
+  {
+    "id": "58ffeaef.9756a4",
+    "type": "debug",
+    "z": "236a59c6.43f3e6",
+    "name": "debug",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 770,
+    "y": 200,
+    "wires": []
+  },
+  {
+    "id": "8ad7b6a1.b0f0d8",
+    "type": "json",
+    "z": "236a59c6.43f3e6",
+    "name": "",
+    "property": "payload",
+    "action": "",
+    "pretty": false,
+    "x": 250,
+    "y": 240,
+    "wires": [
+      [
+        "ad320377.9db19",
+        "f39cc909.c5f7d8"
+      ]
+    ]
+  },
+  {
+    "id": "ab0512f2.af4a",
+    "type": "debug",
+    "z": "236a59c6.43f3e6",
+    "name": "debug",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 950,
+    "y": 240,
+    "wires": []
+  },
+  {
+    "id": "b9f3b130.88179",
+    "type": "subflow:6fa90ba5.23aa14",
+    "z": "236a59c6.43f3e6",
+    "name": "",
+    "env": [],
+    "x": 790,
+    "y": 240,
+    "wires": [
+      [
+        "ab0512f2.af4a"
+      ]
+    ]
+  },
+  {
+    "id": "b9951b57.0dce68",
+    "type": "debug",
+    "z": "236a59c6.43f3e6",
+    "name": "debug",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 570,
+    "y": 200,
+    "wires": []
+  },
+  {
+    "id": "ced5239d.983ea",
+    "type": "comment",
+    "z": "236a59c6.43f3e6",
+    "name": "汎用的にできるようにした！Topic:TwoData",
+    "info": "",
+    "x": 170,
+    "y": 200,
+    "wires": []
+  },
+  {
+    "id": "f39cc909.c5f7d8",
+    "type": "debug",
+    "z": "236a59c6.43f3e6",
+    "name": "debug",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 410,
+    "y": 200,
+    "wires": []
+  },
+  {
+    "id": "850bda47.853398",
+    "type": "mqtt-broker",
+    "z": "",
+    "name": "",
+    "broker": "192.168.1.168",
+    "port": "1883",
+    "clientid": "",
+    "usetls": false,
+    "compatmode": true,
+    "keepalive": "60",
+    "cleansession": true,
+    "birthTopic": "",
+    "birthQos": "0",
+    "birthPayload": "",
+    "closeTopic": "",
+    "closeQos": "0",
+    "closePayload": "",
+    "willTopic": "",
+    "willQos": "0",
+    "willPayload": ""
+  }
+]
